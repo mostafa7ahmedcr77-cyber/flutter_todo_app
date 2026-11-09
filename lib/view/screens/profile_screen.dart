@@ -1,7 +1,12 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:projict_3_todo/core/app_dialog.dart';
+
 import 'package:projict_3_todo/core/app_routes.dart';
 import 'package:projict_3_todo/data/model/user_model.dart';
+import 'package:projict_3_todo/view/widgets/custom_material_button.dart';
+import 'package:projict_3_todo/view/widgets/custom_text_form_field.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -38,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             CustomTextFormField(
               lable: "Full Name",
+              hint: "Enter your name",
               controller: fullName,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -47,9 +53,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
             SizedBox(height: 50),
-            MaterialButton(
+            CustomMaterialButton(
+              text: "Create",
               onPressed: () async {
-                _showLoading();
+                AppDialog.showLoading(context);
                 var userBox = Hive.box<UserModel>('user');
                 await userBox
                     .put("UserKey", UserModel(fullName: fullName.text))
@@ -59,128 +66,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     })
                     .catchError((error) {
                       Navigator.of(context).pop();
-                      _showError(error);
+                      AppDialog.showError(context, error);
                     });
               },
-              color: Color(0xff3F51B5),
-              padding: EdgeInsets.all(10),
-              minWidth: 300,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.circular(12),
-              ),
-              child: Text(
-                "Create",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Future<void> _showLoading() async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Row(
-            spacing: 20,
-            children: [
-              CircularProgressIndicator(),
-              Text(
-                "Loding...",
-                style: TextStyle(fontSize: 16, fontWeight: .w400),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _showError(String error) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text(
-            'Error',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: .bold,
-              color: Colors.red,
-            ),
-          ),
-          content: Text(
-            error,
-            style: TextStyle(fontSize: 16, fontWeight: .bold),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class CustomTextFormField extends StatelessWidget {
-  const CustomTextFormField({
-    super.key,
-    this.controller,
-    this.validator,
-    required this.lable,
-  });
-
-  final TextEditingController? controller;
-  final String? Function(String?)? validator;
-  final String lable;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(lable, style: TextStyle(fontSize: 16, fontWeight: .bold)),
-        SizedBox(height: 5),
-        TextFormField(
-          controller: controller,
-          validator: validator,
-          decoration: InputDecoration(
-            hint: Text("Enter your name", style: TextStyle(color: Colors.grey)),
-            fillColor: Color(0xffFFFFFF),
-            filled: true,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.blue),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.black),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
