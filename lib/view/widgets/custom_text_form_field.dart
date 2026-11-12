@@ -15,13 +15,17 @@ class CustomTextFormField extends StatelessWidget {
   final String lable;
   final String hint;
   final int maxLines;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(lable, style: TextStyle(fontSize: 16, fontWeight: .bold)),
+        Text(
+          lable,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         SizedBox(height: 5),
         TextFormField(
           controller: controller,

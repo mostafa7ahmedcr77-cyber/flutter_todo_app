@@ -1,8 +1,6 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:projict_3_todo/core/app_dialog.dart';
-
 import 'package:projict_3_todo/core/app_routes.dart';
 import 'package:projict_3_todo/data/model/user_model.dart';
 import 'package:projict_3_todo/view/widgets/custom_material_button.dart';
@@ -17,6 +15,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   var fullName = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,10 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 20),
             Text(
               "create Your Profile",
-              style: TextStyle(fontSize: 20, fontWeight: .bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-
             CustomTextFormField(
               lable: "Full Name",
               hint: "Enter your name",
@@ -58,6 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () async {
                 AppDialog.showLoading(context);
                 var userBox = Hive.box<UserModel>('user');
+
                 await userBox
                     .put("UserKey", UserModel(fullName: fullName.text))
                     .then((value) {

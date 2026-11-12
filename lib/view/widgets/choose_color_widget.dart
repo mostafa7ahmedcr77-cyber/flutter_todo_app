@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ChooseColorWidget extends StatefulWidget {
   const ChooseColorWidget({super.key, required this.clickColor});
+
   final void Function(int) clickColor;
 
   @override
@@ -17,15 +18,20 @@ class _ChooseColorWidgetState extends State<ChooseColorWidget> {
     0xffF44336,
     0xff009688,
   ];
+
   int selectedColor = 0xff2196F3;
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 5,
-      mainAxisSize: .min,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text("Choose Color", style: TextStyle(fontSize: 16, fontWeight: .bold)),
+        Text(
+          "Choose Color",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
         Row(
           spacing: 10,
           children: colorHex

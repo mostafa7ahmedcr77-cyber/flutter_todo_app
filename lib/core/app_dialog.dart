@@ -4,7 +4,7 @@ abstract class AppDialog {
   static Future<void> showLoading(BuildContext context) async {
     return showDialog(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           content: Row(
@@ -13,7 +13,7 @@ abstract class AppDialog {
               CircularProgressIndicator(),
               Text(
                 "Loding...",
-                style: TextStyle(fontSize: 16, fontWeight: .w400),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
             ],
           ),
@@ -25,20 +25,20 @@ abstract class AppDialog {
   static Future<void> showError(BuildContext context, String error) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
             'Error',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: .bold,
+              fontWeight: FontWeight.bold,
               color: Colors.red,
             ),
           ),
           content: Text(
             error,
-            style: TextStyle(fontSize: 16, fontWeight: .bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           actions: [
             TextButton(

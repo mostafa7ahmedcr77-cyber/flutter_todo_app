@@ -1,5 +1,9 @@
 import 'dart:developer';
 
+import 'package:hive_flutter/hive_flutter.dart';
+
+import '../../data/model/task_model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:projict_3_todo/view/widgets/choose_color_widget.dart';
 import 'package:projict_3_todo/view/widgets/custom_material_button.dart';
@@ -17,21 +21,24 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   var titleTask = TextEditingController();
   var desTask = TextEditingController();
   int colorSelected = 4283215696;
+
+  get AppDialog => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF5F7FB),
+      backgroundColor: const Color(0xffF5F7FB),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Add Task",
-          style: TextStyle(fontSize: 25, fontWeight: .bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: .start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 15,
           children: [
             CustomTextFormField(
@@ -45,7 +52,10 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
               maxLines: 4,
               controller: desTask,
             ),
-            Text("Status", style: TextStyle(fontSize: 16, fontWeight: .bold)),
+            const Text(
+              "Status",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
             DropdownButton(
               value: dropdownButtonValue,
               icon: const Icon(Icons.arrow_downward),
@@ -55,36 +65,58 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   value: "pending",
                   child: Text(
                     "pending",
-                    style: TextStyle(fontSize: 16, fontWeight: .w500),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ),
                 DropdownMenuItem(
                   value: "Done",
                   child: Text(
-                    "pending",
-                    style: TextStyle(fontSize: 16, fontWeight: .w500),
+                    "Done",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
               onChanged: (value) {
-                dropdownButtonValue = value ?? "Pending";
-                setState(() {});
+                setState(() {
+                  dropdownButtonValue = value ?? "pending";
+                });
               },
             ),
-
             ChooseColorWidget(
               clickColor: (color) {
                 log(color.toString());
                 colorSelected = color;
               },
             ),
-
             CustomMaterialButton(
-              onPressed: () {
-                log("Title: ${titleTask.text}");
-                log("Des: ${desTask.text}");
-                log("Status ${dropdownButtonValue}");
-                log("Color; $colorSelected");
+              onPressed: () async {
+                // log("Title: ${titleTask.text}");
+                // log("Des: ${desTask.text}");
+                // log("Status: $dropdownButtonValue");
+                // log("Color: $colorSelected");
+                AppDialog.showLoading(context);
+                var taskBox = Hive.box<TaskModel>('Tasks');
+                await taskBox
+                    .add(
+                      TaskModel(
+                        title: titleTask.text,
+                        description: desTask.text,
+                        status: dropdownButtonValue == "Pending"
+                            ? .pending
+                            : .done,
+                        colorHex: colorSelected,
+                      ),
+                    )
+                    .then((value) {
+                      Navigator.of(context).pop();
+                      titleTask.clear();
+                      desTask.clear();
+                      colorSelected = 4283215696;
+                    })
+                    .catchError((error) {
+                      Navigator.of(context).pop();
+                      AppDialog.showError(context, error);
+                    });
               },
               text: "Save",
             ),
