@@ -11,64 +11,55 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  var fullName = TextEditingController();
+  final fullName = TextEditingController();
+
+  @override
+  void dispose() {
+    fullName.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF5F7FB),
+      backgroundColor: const Color(0xffF5F7FB),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            SizedBox(height: 100),
+            const SizedBox(height: 100),
             Container(
-              padding: EdgeInsets.all(30),
+              padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: Color(0xffE8ECF5),
+                color: const Color(0xffE8ECF5),
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: Icon(Icons.person, size: 100, color: Color(0xff3F51B5)),
+              child: const Icon(
+                Icons.person,
+                size: 100,
+                color: Color(0xff3F51B5),
+              ),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               "create Your Profile",
-              style: TextStyle(fontSize: 20, fontWeight: .bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            CustomTextFormField(
-              lable: "Full Name",
-              controller: fullName,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Enter your name";
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 50),
+            CustomTextFormField(lable: "Full Name", controller: fullName),
+
+            const SizedBox(height: 50),
+
             MaterialButton(
-              onPressed: () async {
-                _showLoading();
-                var userBox = Hive.box<UserModel>('user');
-                await userBox
-                    .put("UserKey", UserModel(fullName: fullName.text))
-                    .then((value) {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed(AppRoutes.home);
-                    })
-                    .catchError((error) {
-                      Navigator.of(context).pop();
-                      _showError(error);
-                    });
-              },
-              color: Color(0xff3F51B5),
-              padding: EdgeInsets.all(10),
+              onPressed: _saveProfile,
+              color: const Color(0xff3F51B5),
+              padding: const EdgeInsets.all(10),
               minWidth: 300,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.circular(12),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
+              child: const Text(
                 "Create",
                 style: TextStyle(
                   fontSize: 20,
@@ -83,19 +74,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _showLoading() async {
-    return showDialog(
+  Future<void> _saveProfile() async {
+    if (fullName.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter your name")));
+      return;
+    }
+
+    final navigator = Navigator.of(context);
+
+    _showLoading();
+
+    try {
+      final userBox = Hive.box<UserModel>('User');
+
+      await userBox.put("UserKey", UserModel(fullName: fullName.text.trim()));
+
+      if (!mounted) return;
+
+      navigator.pop();
+
+      navigator.pushReplacementNamed(AppRoutes.home);
+    } catch (error) {
+      if (!mounted) return;
+
+      navigator.pop();
+      _showError(error.toString());
+    }
+  }
+
+  void _showLoading() {
+    showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return const AlertDialog(
           content: Row(
             spacing: 20,
             children: [
               CircularProgressIndicator(),
               Text(
-                "Loding...",
-                style: TextStyle(fontSize: 16, fontWeight: .w400),
+                "Loading...",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               ),
             ],
           ),
@@ -104,30 +125,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _showError(String error) async {
-    return showDialog<void>(
+  void _showError(String error) {
+    showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text(
             'Error',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: .bold,
+              fontWeight: FontWeight.bold,
               color: Colors.red,
             ),
           ),
           content: Text(
             error,
-            style: TextStyle(fontSize: 16, fontWeight: .bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           actions: [
             TextButton(
-              child: const Text('Ok'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
+              child: const Text('Ok'),
             ),
           ],
         );
@@ -137,46 +157,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 class CustomTextFormField extends StatelessWidget {
-  const CustomTextFormField({
-    super.key,
-    this.controller,
-    this.validator,
-    required this.lable,
-  });
+  const CustomTextFormField({super.key, this.controller, required this.lable});
 
   final TextEditingController? controller;
-  final String? Function(String?)? validator;
   final String lable;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(lable, style: TextStyle(fontSize: 16, fontWeight: .bold)),
-        SizedBox(height: 5),
+        Text(
+          lable,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
         TextFormField(
           controller: controller,
-          validator: validator,
           decoration: InputDecoration(
-            hint: Text("Enter your name", style: TextStyle(color: Colors.grey)),
-            fillColor: Color(0xffFFFFFF),
+            hint: const Text(
+              "Enter your name",
+              style: TextStyle(color: Colors.grey),
+            ),
+            fillColor: const Color(0xffFFFFFF),
             filled: true,
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.blue),
+              borderSide: const BorderSide(color: Colors.blue),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: const BorderSide(color: Colors.red),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.black),
+              borderSide: const BorderSide(color: Colors.black),
             ),
           ),
         ),
